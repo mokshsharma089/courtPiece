@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{%block content%}
+    <div class="top">
+        {{game.code}}
+    </div>
+
+    <br /> <hr><br />
+
+    <div class="table">
+        <h1>Table Area</h1>
+    </div>
+
+    <br /> <hr><br />
+
+    <div class="player1">
+        {% for card in A_hand %}
+        <p>{{card.suit}}-{{card.rank}}</p>
+        {% endfor %}
+    </div>
+
+    <br /> <hr><br />
+
+    <div class="player2">
+        {% for card in B_hand %}
+        <p>{{card.suit}}-{{card.rank}}</p>
+        {% endfor %}
+    </div>
+
+    <br /> <hr><br />
+
+    <div class="player3">
+        {% for card in C_hand %}
+        <p>{{card.suit}}-{{card.rank}}</p>
+        {% endfor %}
+    </div>
+
+    <br /> <hr><br />
+
+    <div class="player4">
+        {% for card in D_hand %}
+        <p>{{card.suit}}-{{card.rank}}</p>
+        {% endfor %}
+    </div>
+{%endblock%}

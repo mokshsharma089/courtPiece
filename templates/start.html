@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{%block content%}
+<form action=" " method="POST">
+    {% csrf_token %}
+    
+        <label for="P1">Player 1 Name</label>
+        <input type="text" name="P1" id="P1">
+        <hr>
+        <label for="P2">Player 2 Name</label>
+        <input type="text" name="P2" id="P2">
+        <hr>
+        <label for="P3">Player 3 Name</label>
+        <input type="text" name="P3" id="P3">
+        <hr>
+        <label for="P4">Player 4 Name</label>
+        <input type="text" name="P4" id="P4">
+        <input type="submit">
+</form>
+{%endblock%}
