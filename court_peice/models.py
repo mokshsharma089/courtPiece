@@ -47,10 +47,11 @@ class Round(models.Model):
         ('Q','12'),
         ('K','13'),
     ]
-    game=models.OneToOneField(Game,on_delete=models.CASCADE)
+    game=models.ForeignKey(Game,on_delete=models.CASCADE)
     player=models.OneToOneField(Player,on_delete=models.CASCADE)
     suit=models.CharField(max_length=2,choices=SUIT_CHOICES)
     rank=models.CharField(max_length=1,choices=RANK_CHOICES)
+    strongSuit=models.CharField(max_length=2,choices=SUIT_CHOICES)
     def __str__(self):
         return 'Game {0},Player {1},{2}-{3}'.format(self.game,self.player,self.suit,self.rank)
 

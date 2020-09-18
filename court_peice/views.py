@@ -1,6 +1,9 @@
 import random,string
-from django.shortcuts import render
+from django.shortcuts import render,get_object_or_404
+from django.http import HttpResponseRedirect
+from django.contrib import messages
 from .models import Player,Card,Game,Round
+
 
 
 PointsSystem={
@@ -59,4 +62,104 @@ def OpenTable(request):
     return render(request,'table.html',context)
     
 
+def ShowTable(request,slug):
+    g=get_object_or_404(Game,code=slug)
+    players=Player.objects.filter(game=g)
+    roundDetails=Round.objects.filter(game=g)
+    roundState=[]
+    strSuit='NA'
+    if roundDetails:
+        for ro in roundDetails:
+            tempRoundObject={
+                "player":'playerName',
+                "suit":'SPADES',
+                "rank": '15'
+            }
+            strSuit=ro.strongSuit
+            tempRoundObject["player"]=ro.player
+            tempRoundObject["suit"]=ro.suit
+            tempRoundObject["rank"]=ro.rank
+            roundState.append(tempRoundObject)
+    Player_Hand_list=[]
+    for player in players:
+        
+        tempPlayerObject={
+        'name':'aa',
+        'score':0,
+        'hand':[]
+        }
+        tempPlayerObject["name"]=player.name
+        tempPlayerObject["score"]=player.score
+        currentPlayerCards=Card.objects.filter(player=player)
+        for card in currentPlayerCards:
+            tempPlayerObject["hand"].append(card)
+        Player_Hand_list.append(tempPlayerObject)
+    context={
+        "game":g,
+        "round":roundState,
+        'strongSuit':strSuit,
+        'PlayerList':Player_Hand_list
+        
+    }
+    return render(request,'table.html',context)
+
+def calculateValueOfCard(suit,rank,StrongPattern,Patterns):
+    cardValue=Patterns[suit]
+    if(suit==StrongPattern):
+        cardValue*=10
+    cardValue+=PointsSystem[rank]
+    return cardValue
+
+def CalculateRoundResult(request,slug):
+    g=get_object_or_404(Game,code=slug)
+    patterns={
+        "DI":g.DI_wt,
+        "HE":g.HE_wt,
+        "SP":g.SP_wt,
+        "CL":g.CL_wt
+    }
+    roundDetailsQuerySet=Round.objects.filter(game=g)
+    roundDetails=list(roundDetailsQuerySet)
+    if len(roundDetails)<4:
+        return HttpResponseRedirect('/game/{0}'.format(slug))
+    else:
+        winner=roundDetails[0].player
+        StrPattern=roundDetails[0].strongSuit
+        BestSuit=roundDetails[0].suit
+        BestRank=roundDetails[0].rank
+        BestCardValue=calculateValueOfCard(BestSuit,BestRank,StrPattern,patterns)
+        j=1
+        for i in range(1,4):
+            player=roundDetails[j].player
+            SuitPlayed=roundDetails[j].suit
+            RankPlayed=roundDetails[j].rank
+            CardPlayedValue=calculateValueOfCard(SuitPlayed,RankPlayed,StrPattern,patterns)
+            if  CardPlayedValue>BestCardValue:
+                winner=player
+                BestSuit=SuitPlayed
+                BestRank=RankPlayed
+                BestCardValue=CardPlayedValue
+            j+=1
+        playerWhoWon=Player.objects.get(game=g,name=winner.name)
+        playerWhoWon.score+=1
+        playerWhoWon.save()
+        messages.info(request, "{0} won by playing {1}-{2} and his CardValue was {3}".format(winner,BestSuit,BestRank,BestCardValue))
+        # print("{0} won by playing {1}-{2} and his score is {3}".format(winner,BestSuit,BestRank,BestCardValue))
+        for obj in roundDetailsQuerySet:
+            obj.delete()
+        return HttpResponseRedirect('/game/{0}'.format(slug))
+        
+        
+    # roundState=[]
+    # if roundDetails:
+    #     for ro in roundDetails:
+    #         tempRoundObject={
+    #             "player":'playerName',
+    #             "suit":'SPADES',
+    #             "rank": '15'
+    #         }
+    #         tempRoundObject["player"]=ro.player
+    #         tempRoundObject["suit"]=ro.suit
+    #         tempRoundObject["rank"]=ro.rank
+    #         roundState.append(tempRoundObject)
 

@@ -1,44 +1,73 @@
 {% extends 'base.html' %}
 {%block content%}
-    <div class="top">
+    <div class="top" style = "text-align:center">
         {{game.code}}
+        <p>
+            Trump Suit is <strong>{{game.trumpSuit}}</strong>
+        </p>
     </div>
 
     <br /> <hr><br />
 
-    <div class="table">
+    <div class="tableArea" style = "text-align:center">
         <h1>Table Area</h1>
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-success" role="alert">
+                    {{message}}
+                </div>
+            {% endfor %}
+        {% endif %}
+        <h4>Strong Suit is {{strongSuit}}</h4>
+        {% if round %}
+            {% for r in round %}
+            <p>{{r.suit}}-{{r.rank}} by {{r.player}}</p>
+            {%endfor%}
+            <a href="{% url 'CalRoundResult' slug=game.code %}" class="btn btn-primary">Calculate Round Result</a>
+        {% else %}
+            <p>No Player has played a hand in this Round</p>
+        {% endif %}
     </div>
 
     <br /> <hr><br />
-
-    <div class="player1">
-        {% for card in A_hand %}
-        <p>{{card.suit}}-{{card.rank}}</p>
+    <div class="row">
+        {% for player in PlayerList %}
+            <div class="column">
+                <h3>{{player.name}}</h3> 
+                <h6>{{player.score}}</h6>
+                {% for card in player.hand %}
+                    <p>{{card.suit}}-{{card.rank}}</p>
+                {% endfor %}
+            </div>
         {% endfor %}
-    </div>
-
-    <br /> <hr><br />
-
-    <div class="player2">
-        {% for card in B_hand %}
-        <p>{{card.suit}}-{{card.rank}}</p>
-        {% endfor %}
-    </div>
-
-    <br /> <hr><br />
-
-    <div class="player3">
-        {% for card in C_hand %}
-        <p>{{card.suit}}-{{card.rank}}</p>
-        {% endfor %}
-    </div>
-
-    <br /> <hr><br />
-
-    <div class="player4">
-        {% for card in D_hand %}
-        <p>{{card.suit}}-{{card.rank}}</p>
-        {% endfor %}
-    </div>
+        <!-- <div class="column">
+            Name={{Player1.name}}
+            Score={{Player1.score}}
+            {% for card in player1.hand %}
+                <p>{{card.suit}}-{{card.rank}}</p>
+            {% endfor %}
+        </div>
+        <div class="column">
+            Name={{Player2.name}}
+            Score={{Player2.score}}
+            {% for card in player2.hand %}
+                <p>{{card.suit}}-{{card.rank}}</p>
+            {% endfor %}
+        </div>
+        <div class="column">
+            Name={{Player3.name}}
+            Score={{Player3.score}}
+            {% for card in player3.hand %}
+                <p>{{card.suit}}-{{card.rank}}</p>
+            {% endfor %}
+        </div>
+        <div class="column">
+            Name={{Player4.name}}
+            Score={{Player4.score}}
+            {% for card in player4.hand %}
+                <p>{{card.suit}}-{{card.rank}}</p>
+            {% endfor %}
+        </div> -->
+      </div>
+   
 {%endblock%}
