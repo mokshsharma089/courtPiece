@@ -148,18 +148,60 @@ def CalculateRoundResult(request,slug):
         for obj in roundDetailsQuerySet:
             obj.delete()
         return HttpResponseRedirect('/game/{0}'.format(slug))
-        
-        
-    # roundState=[]
-    # if roundDetails:
-    #     for ro in roundDetails:
-    #         tempRoundObject={
-    #             "player":'playerName',
-    #             "suit":'SPADES',
-    #             "rank": '15'
-    #         }
-    #         tempRoundObject["player"]=ro.player
-    #         tempRoundObject["suit"]=ro.suit
-    #         tempRoundObject["rank"]=ro.rank
-    #         roundState.append(tempRoundObject)
 
+def CustomTableForOne(request,code,name):
+    g=get_object_or_404(Game,code=code)
+    player=get_object_or_404(Player,game=g,name=name)
+    roundDetails=Round.objects.filter(game=g)
+    roundState=[]
+    strSuit='NA'
+    Currenthand=[]
+    if roundDetails:
+        for ro in roundDetails:
+            tempRoundObject={
+                "player":'playerName',
+                "suit":'SPADES',
+                "rank": '15'
+            }
+            strSuit=ro.strongSuit
+            tempRoundObject["player"]=ro.player
+            tempRoundObject["suit"]=ro.suit
+            tempRoundObject["rank"]=ro.rank
+            roundState.append(tempRoundObject)
+    currentPlayerCards=Card.objects.filter(player=player)
+    for card in currentPlayerCards:
+        Currenthand.append(card)
+    context={
+        "PlayerName":player.name,
+        "Score":player.score,
+        "game":g,
+        "round":roundState,
+        'strongSuit':strSuit,
+        'Currenthand':Currenthand,
+    }
+    return render(request,'customViewPage.html',context)
+    
+
+def AddCardToRound(request,code,name):
+    if request.method =='POST':
+        g=get_object_or_404(Game,code=code)
+        print("inhere")
+        p=get_object_or_404(Player,game=g,name=name)
+        strSuit='NA'
+        if Round.objects.filter(game=g,player=p).exists():
+            messages.info(request, "hey your already have added a card this round")
+            return HttpResponseRedirect('/game/{0}/{1}'.format(code,name))
+        
+        cardId=request.POST.get('cardPlayed')
+        print("If thsis is printed then that means has not added a card this round")
+        print(cardId)
+        c=Card.objects.get(pk=cardId)
+        if Round.objects.filter(game=g).exists():
+            strSuit=Round.objects.filter(game=g)[0].strongSuit
+            print(strSuit)
+        else:
+            strSuit=c.suit
+        Round.objects.create(game=g,player=p,rank=c.rank,suit=c.suit,strongSuit=strSuit)
+        c.delete()
+        print("got card {0}-{1}".format(c.suit,c.rank))
+        return HttpResponseRedirect('/game/{0}/{1}'.format(code,name))

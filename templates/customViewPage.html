@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{PlayerName}} of {{game.code}}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+</head>
+<body>
+    
+<div class="top" style = "text-align:center">
+    <h1>{{PlayerName}}</h1>
+    <h3>{{Score}}</h3>
+    {{game.code}}
+    <p>
+        Trump Suit is <strong>{{game.trumpSuit}}</strong>
+    </p>
+</div>
+
+<br /> <hr><br />
+
+<div class="tableArea" style = "text-align:center">
+    <h1>Table Area</h1>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-danger" role="alert">
+                {{message}}
+            </div>
+        {% endfor %}
+    {% endif %}
+    <h4>Strong Suit is {{strongSuit}}</h4>
+    {% if round %}
+        {% for r in round %}
+        <p>{{r.suit}}-{{r.rank}} by {{r.player}}</p>
+        {%endfor%}
+        <a href="{% url 'CalRoundResult' slug=game.code %}" class="btn btn-primary">Calculate Round Result</a>
+    {% else %}
+        <p>No Player has played a hand in this Round</p>
+    {% endif %}
+</div>
+
+<br /> <hr><br />
+<div style = "text-align:center">
+    {% for card in Currenthand %}
+        <span style="margin-left: 25px;">{{card.suit}}-{{card.rank}}</span>
+    {% endfor %}
+
+</div>
+<div style = "text-align:center;margin-top: 20px;">
+    <form action="{% url 'AddCardToRound' code=game.code name=PlayerName%}" method="POST">
+        {% csrf_token %}
+        <label for="cardPlayed">Select Card To Play</label>
+        <select name="cardPlayed" id="cardPlayed">
+            {% for c in Currenthand %}
+            <option value="{{c.pk}}">{{c.suit}}-{{c.rank}}</option>
+            {% endfor %}
+        </select>
+        <input type="submit">
+    </form>
+</div>
+
+
+</body>
+</html>
